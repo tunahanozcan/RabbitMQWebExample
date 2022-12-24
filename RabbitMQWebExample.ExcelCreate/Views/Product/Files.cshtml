@@ -1,4 +1,23 @@
 ﻿@model List<UserFile>
+@section Scripts{
+    <script>
+        $(document).ready(() => {
+            var hasStartCreatingExcel = '@TempData["StartCreatingExcel"]';
+
+            if(hasStartCreatingExcel){
+
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Excel oluşturma işlemi başlamıştır, bittiğinde bilgi verilecektir.',
+                    showConfirmButton: false,
+                    timer:2500
+
+                })
+            }
+        });
+    </script>
+}
 @{
     ViewData["Title"] = "Files";
 }

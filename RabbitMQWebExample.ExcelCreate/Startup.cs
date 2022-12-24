@@ -6,7 +6,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using RabbitMQ.Client;
+using RabbitMQWebExample.ExcelCreate.Hubs;
 using RabbitMQWebExample.ExcelCreate.Models;
+using RabbitMQWebExample.ExcelCreate.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +28,11 @@ namespace RabbitMQWebExample.ExcelCreate
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton(sp => new ConnectionFactory() { Uri = new Uri(Configuration.GetConnectionString("RabbitMQ")), DispatchConsumersAsync = true });
+
+            services.AddSingleton<RabbitMQPublisher>();
+            services.AddSingleton<RabbitMQClientService>();
+
             services.AddDbContext<AppDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("SqlServer"));
@@ -35,6 +43,8 @@ namespace RabbitMQWebExample.ExcelCreate
             }).AddEntityFrameworkStores<AppDbContext>();
 
             services.AddControllersWithViews();
+
+            services.AddSignalR();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -57,6 +67,7 @@ namespace RabbitMQWebExample.ExcelCreate
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapHub<MyHub>("/MyHub");
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
